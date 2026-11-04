@@ -1,0 +1,86 @@
+<!doctype html><meta charset=utf-8><title>Wallpaper Studio</title>
+<style>
+:root{--bg:#1b1e25;--ln:#2e333d;--bl:#2f6fe4}
+*{box-sizing:border-box}
+body{margin:0;height:100vh;display:flex;flex-direction:column;background:var(--bg);color:#e8eaed;font:13px 'Segoe UI',system-ui;user-select:none;overflow:hidden}
+button,select,input{font:inherit;color:#e8eaed;accent-color:var(--bl)}
+.btn{background:#2b303a;border:1px solid #3a404c;padding:7px 12px;cursor:pointer}.btn:hover{background:#363c49}
+.pri{background:var(--bl);border-color:var(--bl)}.pri:hover{background:#3d7bf0}.red{background:#d9483b;border-color:#d9483b}.red:hover{background:#e65a4d}
+select,input[type=text],input[type=number]{background:#12141a;border:1px solid #3a404c;padding:6px}
+.hide{display:none!important}.c{color:#9aa0ac;text-align:center}
+#top{display:flex;align-items:center;gap:6px;padding:8px 14px;border-bottom:2px solid var(--bl)}
+.tab{background:none;border:1px solid #3a404c;padding:5px 12px;cursor:pointer;font-size:15px}.tab.on{background:var(--bl);border-color:var(--bl)}
+#mid{flex:1;display:flex;min-height:0}
+#left{flex:1;display:flex;flex-direction:column;padding:10px 14px;min-width:0}
+#tb{display:flex;gap:8px;margin-bottom:10px;align-items:center}#q{width:240px}#sp{flex:1}
+#grid{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,180px);gap:5px;align-content:start}
+.card{position:relative;width:180px;height:180px;background:#252a33;border:2px solid transparent;cursor:pointer;overflow:hidden}
+.card.sel{border-color:var(--bl)}
+.th{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.ph{background:linear-gradient(135deg,#ff3c8e55,#3c8eff55)}
+.nm{position:absolute;left:0;right:0;bottom:0;padding:20px 6px 5px;text-align:center;font-size:12px;background:linear-gradient(transparent,rgba(0,0,0,.8))}
+.ck{position:absolute;top:5px;right:5px;width:17px;height:17px;border:2px solid #7d8594;background:rgba(0,0,0,.45);display:none;z-index:2}
+.card:hover .ck,.ck.on{display:block}.ck.on{background:var(--bl);border-color:var(--bl)}
+#right{width:360px;border-left:1px solid var(--ln);padding:14px 20px;overflow:auto}
+.pv{position:relative;width:260px;height:260px;margin:0 auto 14px;background:#252a33}
+#right h2{text-align:center;font-weight:400;font-size:18px;margin:6px 0}#right h4{font-weight:400;font-size:14px;margin:18px 0 6px;border-bottom:1px solid var(--ln);padding-bottom:4px;color:#cfd3da}
+.row{display:flex;align-items:center;gap:10px;margin:11px 0}.row label{width:125px}.row input[type=range]{flex:1}.row .v{width:34px;text-align:right}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#bot{border-top:1px solid var(--ln);padding:8px 14px 10px}
+#plh{display:flex;align-items:center;gap:6px}#plh h3{margin:0 10px 0 0;font-weight:400;font-size:21px}
+#pls{display:flex;gap:6px;margin:10px 0;min-height:48px}
+.pt{position:relative;width:46px;height:46px;background:#252a33;border:2px solid transparent;cursor:pointer;overflow:hidden}.pt.sel{border-color:var(--bl)}
+#bb{display:flex;gap:6px;align-items:center}
+#md{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:9}
+#md>div{background:#252a33;border:1px solid #3a404c;padding:20px 26px;min-width:380px;max-width:640px;max-height:80vh;overflow:auto}
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#000c;padding:8px 16px;z-index:10}
+#wsl{overflow:auto;flex:1;margin-top:10px}.wr{display:flex;align-items:center;gap:10px;padding:4px;border-bottom:1px solid var(--ln)}
+.wr .t{position:relative;width:60px;height:60px;flex:none;background:#252a33}
+#ed{position:fixed;inset:0;background:var(--bg);z-index:8;display:flex;flex-direction:column;padding:12px 18px;overflow:auto}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+#wrap{display:flex;gap:12px}#ly{width:190px}
+canvas,iframe{border:1px solid #444;background:#000;width:100%;max-width:980px;aspect-ratio:16/9}
+</style>
+<div id=top>
+ <button class="tab on" id=t1 onclick="tabTo('inst')">&#128190; Installed</button>
+ <button class=tab onclick="call('ext','https://steamcommunity.com/app/431960/workshop/')">&#9737; Discover</button>
+ <button class=tab id=t3 onclick="tabTo('ws')">&#9881; Workshop</button>
+ <span style="flex:1"></span>
+ <button class=btn onclick=displays()>&#9645; Displays</button><button class=btn onclick=settings()>&#9881; Settings</button>
+</div>
+<div id=mid>
+ <div id=left>
+  <div id=tb><input type=text id=q placeholder="Search" oninput=render()><button class="btn pri" onclick="$('q').value='';render()">&#9776; Filter results</button>
+   <span id=sp></span><select id=sort onchange=render()><option>Name<option>Type<option>Newest</select></div>
+  <div id=grid></div>
+  <div id=wsv class=hide style="flex:1;flex-direction:column;min-height:0">
+   <p>Import wallpapers you already have in Wallpaper Engine or the Steam Workshop. <b>Video, web and image</b> wallpapers work. “Scene” and “Application” wallpapers aren’t supported yet.</p>
+   <div class=bar><button class=btn onclick=wsScan()>Scan this PC</button><button class=btn onclick=wsBrowse()>Choose folder…</button><button class="btn pri" onclick=wsImport()>Import selected</button><span id=wsm class=c></span></div>
+   <div id=wsl></div></div>
+ </div>
+ <div id=right></div>
+</div>
+<div id=bot>
+ <div id=plh><h3>Playlist (<span id=pln>0</span>)</h3>
+  <button class=btn onclick=plLoad()>&#128194; Load</button><button class=btn onclick=plSave()>&#128190; Save</button><button class=btn onclick=plCfg()>&#9881; Configure</button>
+  <button class="btn pri" onclick=plRemove()>&minus; Remove wallpaper</button><span style="flex:1"></span><button class="btn red" onclick=plClear()>&#128465; Clear</button></div>
+ <div id=pls></div>
+ <div id=bb><button class="btn pri" style="width:250px" onclick=openEd()>&#9998; Wallpaper Editor</button><button class=btn style="width:250px" onclick="call('imp').then(refresh)">&#8682; Open Wallpaper</button>
+  <span style="flex:1"></span><button class="btn pri" style="width:95px" onclick=ok()>OK</button><button class=btn style="width:95px" onclick=window.close()>Cancel</button></div>
+</div>
+<div id=md class=hide onclick="if(event.target==this)closeM()"><div id=mdc></div></div>
+<div id=toast class=hide></div>
+<div id=ed class=hide oninput=upd()>
+ <div class=bar><b style="font-size:18px">Wallpaper Editor</b><span style="flex:1"></span><button class=btn onclick=closeEd()>Close</button></div>
+ <div class=bar><select id=mode onchange=mm()><option value=art>Art (layers)</option><option value=live>Live (animated)</option><option value=interactive>Interactive (mouse)</option></select>
+  <input type=text id=nm value="My wallpaper"><button class="btn pri" onclick=save()>Save to library</button></div>
+ <div class=bar id=ao><select id=tool><option>brush<option>eraser<option>line<option>rect<option>ellipse<option>text</select>
+  color <input type=color id=bc value=#ff66cc> size <input type=range id=bs min=1 max=80 value=8><label><input type=checkbox id=fill> fill</label>
+  text <input type=text id=tx value="Hello" size=10> font <input type=text id=ft value=Arial size=8> bg <input type=color id=bg value=#000000>
+  <button class=btn onclick=undo()>Undo</button><button class=btn onclick=clr()>Clear layer</button></div>
+ <div class="bar hide" id=lo>colors <input type=color id=c1 value=#ff3c8e> <input type=color id=c2 value=#3c8eff>
+  <select id=ps><option>waves<option>particles<option>stars</select> speed <input type=range id=sp2 min=1 max=10 value=4></div>
+ <div id=wrap><canvas id=cv width=1280 height=720></canvas>
+  <div id=ly-box><div class=bar><button class=btn onclick=addL()>+</button><button class=btn onclick=delL()>&minus;</button><button class=btn onclick=mv(1)>&uarr;</button><button class=btn onclick=mv(-1)>&darr;</button></div><div id=ly></div></div>
+  <iframe id=pv class=hide></iframe></div>
+</div>
+<script src=renderer.js></script><script src=editor.js></script>

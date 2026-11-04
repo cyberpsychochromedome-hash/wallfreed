@@ -1,0 +1,33 @@
+name: build
+on:
+  push: { tags: ['v*'] }
+  workflow_dispatch:
+    inputs: { tag: { description: 'Release tag, e.g. v0.2.1', required: true } }
+permissions: { contents: write }
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: 8.0.x }
+      - name: Build desktop helper
+        run: dotnet publish attach -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o app/bin
+      - name: Build app
+        working-directory: app
+        run: |
+          npm install
+          npx electron-builder --win zip --publish never
+      - name: Build installer
+        shell: bash
+        run: |
+          sed -i "s#OWNER/REPO#${{ github.repository }}#" installer/Program.cs
+          dotnet publish installer -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o out
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          files: |
+            app/dist/*.zip
+            out/WallpaperStudioSetup.exe

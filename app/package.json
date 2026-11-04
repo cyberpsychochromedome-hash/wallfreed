@@ -1,0 +1,5 @@
+{"name":"wallpaper-studio","version":"0.3.0","main":"main.js","scripts":{"start":"electron ."},
+"devDependencies":{"electron":"^33.0.0","electron-builder":"^25.0.0"},
+"build":{"appId":"com.wallpaperstudio.app","productName":"WallpaperStudio","files":["*.js","*.html","icon.png"],
+"extraResources":[{"from":"bin/attach.exe","to":"attach.exe"}],
+"win":{"target":"zip","artifactName":"WallpaperStudio-${version}.zip"}}}
